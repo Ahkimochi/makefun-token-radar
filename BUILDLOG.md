@@ -87,3 +87,18 @@ $176.6M, blended with the $542.8M median price → $261.7M) and the filtered cou
   evidence the snapshot offers.
 - Chain gas figures are a small hand-kept table (the program has no network); unknown chains fall
   back to a stated default row.
+
+## Post-v1 fix — the repo no longer carries the sealed snapshot
+
+`input/snapshot.json` was removed from the repository. Verification basis: the competition's
+RULES.txt has the program read the snapshot at the absolute path `/input/snapshot.json`, and the
+grader mounts the entry's repository read-only at `/bot` — the `/input` mount is the suite's, not
+the repo's. Both the kit starter's and this entry's `main.ts` default `--input` to `/input` (the
+error path says "mount the sealed /input"); the kit ships the snapshot separately under its own
+`input/`, the starter ships with no `input/` directory at all, and no intake check requires the
+file in the repo. The removed copy was byte-for-byte the kit's file (sha256
+42a71213519479f3a180cc5010cbbf6bd18a2447fa0ad29e4c5122b6c9184393); carrying it only cost
+transcript-gate counted lines — 13,729 lines of data no session wrote. Smoke run after the
+removal, pointed at the kit's snapshot (`--input ../radar-kit/token-radar-01-kit/input/snapshot.json`):
+the full output tree is byte-identical to the v1 run (`diff -r` clean, dossier.json included) —
+the model and every output are unchanged.
