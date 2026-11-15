@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Token Radar — pre-token protocols ranked by a comps-fitted implied value</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <div class="logo" aria-hidden="true"></div>
+    <div>
+      <h1>TOKEN RADAR</h1>
+      <p class="tag">Pre-token protocols ranked by implied launch value — fitted from the snapshot's own tokenised protocols, never a list of names.</p>
+    </div>
+  </div>
+  <div class="meta" id="metaLine">Loading the sealed snapshot…</div>
+</header>
+
+<section class="modelstrip" id="modelStrip" aria-label="The value model"></section>
+
+<main id="view" tabindex="-1"></main>
+
+<section class="method" id="method">
+  <h2>How the implied value is derived</h2>
+  <p>The snapshot records a market cap for <b data-m="capn"></b> of its <b data-m="alln"></b> protocols. Those are the
+  comparables. The model regresses their log market cap on log TVL, category, seven-day TVL growth and tokenless age
+  (a least-squares size line, then shrunk category medians and growth and age slopes fitted on the residuals, three
+  passes; the growth and age slopes are capped and shrunk, so one hot week cannot price a protocol). A protocol that
+  records no token is priced by that fitted relationship at its own figures:
+  <span class="formula">curve = exp(a + b·ln TVL) × category multiple × growth multiple × age multiple</span>,
+  and the final price is a geometric blend — 65% that curve, 35% the price at its category's own observed median
+  cap/TVL — with the multiple kept inside the range the comparables themselves trade in. The blend is what the
+  holdout below supports. Nothing is priced from a name.</p>
+  <p>Fitted on <b data-m="comps"></b> comparables (recorded cap of $1M or more): TVL slope <b data-m="slope"></b>,
+  growth coefficient <b data-m="gcoef"></b>, age coefficient <b data-m="acoef"></b>, residual σ <b data-m="sigma"></b> in log
+  terms — each row's band is its implied value × e<sup>±σ</sup>. Tested out of sample on a deterministic half of the
+  comparables (fit on even slug hashes, scored on odd): median log error <b data-m="herr"></b>, <b data-m="h2x"></b> of
+  test caps landed within 2× of the model's price. The production fit uses every comparable.</p>
+  <p>The board ranks only protocols that record no token (no market cap, no CoinGecko id, no symbol) and pass the
+  watchlist's own rule applied at every size, not only above the floor: not a bridge, staking or exchange product
+  (those categories are wrappers over an asset that already trades), not an exchange-named protocol, not a
+  versioned pool, not a wrapped or staked product by name — <b data-m="boardn"></b> rows, the whole
+  <b data-m="wln"></b>-protocol watchlist among them. Protocols whose token already trades are never ranked: the
+  largest are shown apart below, at the market's own values. A further <b data-m="recn"></b> protocols record a token
+  but no cap, and are set aside as already tokenised. Each row's plan is generated from its own record — its
+  category's mechanics, its primary chain's gas costs, a position sized to its TVL tier, a length set by its
+  tokenless age — and netted out in its last step.</p>
+  <div id="catTable"></div>
+</section>
+
+<section class="livebox">
+  <h2>Already trading — the comparables, at the market's own values</h2>
+  <div id="liveTable"></div>
+</section>
+
+<footer>
+  <p>Data: the sealed DefiLlama snapshot in <span id="srcLine"></span>. Implied values are this entry's own model
+  output, not a prediction that a token will be issued. “Records no token” is DefiLlama's record, not proof none exists.</p>
+</footer>
+
+<script src="../data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
